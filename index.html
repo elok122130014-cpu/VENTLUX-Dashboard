@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>VENTALUX Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f3f4f6;
+    padding:20px;
+}
+
+.header{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.header h1{
+    color:#0f766e;
+}
+
+.header p{
+    color:#666;
+}
+
+.dashboard{
+    max-width:900px;
+    margin:auto;
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    padding:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.card-title{
+    text-align:center;
+    font-size:18px;
+    margin-bottom:8px;
+    font-weight:bold;
+}
+
+.value{
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+    color:#16a34a;
+    margin-bottom:10px;
+}
+
+.status{
+    text-align:center;
+    padding:10px;
+    border-radius:20px;
+    color:white;
+    font-weight:bold;
+}
+
+.on{
+    background:#22c55e;
+}
+
+.off{
+    background:#ef4444;
+}
+
+.schedule{
+    margin-top:10px;
+}
+
+.schedule label{
+    display:block;
+    margin-top:8px;
+}
+
+.schedule input{
+    width:100%;
+    padding:6px;
+}
+
+canvas{
+    height:120px !important;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>VENTALUX DASHBOARD</h1>
+<p>Monitoring Sistem Penerangan Rumah Terintegrasi</p>
+</div>
+
+<div class="dashboard">
+
+<div class="card">
+<div class="card-title">Tegangan Baterai</div>
+<div class="value">
+<span id="voltage">11.5</span> V
+</div>
+<canvas id="voltageChart"></canvas>
+</div>
+
+<div class="card">
+<div class="card-title">Suhu Sistem</div>
+<div class="value">
+<span id="temperature">45</span> °C
+</div>
+<canvas id="tempChart"></canvas>
+</div>
+
+<div class="card">
+<div class="card-title">RPM Turbin</div>
+<div class="value">
+<span id="rpm">80</span> RPM
+</div>
+<canvas id="rpmChart"></canvas>
+</div>
+
+<div class="card">
+<div class="card-title">Arus Beban</div>
+<div class="value">
+<span id="current">2.5</span> A
+</div>
+<canvas id="currentChart"></canvas>
+</div>
+
+<div class="card">
+<div class="card-title">Intensitas Cahaya</div>
+<div class="value">
+<span id="lux">350</span> Lux
+</div>
+<canvas id="luxChart"></canvas>
+</div>
+
+<div class="card">
+
+<div class="card-title">Status Lampu</div>
+
+<div id="lampStatus" class="status off">
+OFF
+</div>
+
+<div class="schedule">
+
+<label>Jam ON</label>
+<input type="time" id="onTime">
+
+<label>Jam OFF</label>
+<input type="time" id="offTime">
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let labels=[];
+
+let voltageData=[];
+let tempData=[];
+let rpmData=[];
+let currentData=[];
+let luxData=[];
+
+function createChart(id,label,max){
+
+return new Chart(document.getElementById(id),{
+
+type:'line',
+
+data:{
+labels:labels,
+datasets:[{
+label:label,
+data:[],
+borderWidth:2,
+fill:false
+}]
+},
+
+options:{
+responsive:true,
+
+scales:{
+y:{
+beginAtZero:true,
+max:max
+}
+}
+}
+
+});
+
+}
+
+const voltageChart=createChart(
+"voltageChart",
+"Tegangan",
+15
+);
+
+const tempChart=createChart(
+"tempChart",
+"Suhu",
+70
+);
+
+const rpmChart=createChart(
+"rpmChart",
+"RPM",
+150
+);
+
+const currentChart=createChart(
+"currentChart",
+"Arus",
+10
+);
+
+const luxChart=createChart(
+"luxChart",
+"Lux",
+1000
+);
+
+setInterval(()=>{
+
+const waktu=
+new Date().toLocaleTimeString();
+
+let voltage=
+(11+Math.random()).toFixed(2);
+
+let temp=
+(40+Math.random()*20).toFixed(1);
+
+let rpm=
+Math.floor(
+80+Math.random()*20
+);
+
+let current=
+(2+Math.random()*2).toFixed(2);
+
+let lux=
+Math.floor(
+300+Math.random()*150
+);
+
+document.getElementById(
+"voltage"
+).innerText=voltage;
+
+document.getElementById(
+"temperature"
+).innerText=temp;
+
+document.getElementById(
+"rpm"
+).innerText=rpm;
+
+document.getElementById(
+"current"
+).innerText=current;
+
+document.getElementById(
+"lux"
+).innerText=lux;
+
+labels.push(waktu);
+
+voltageData.push(voltage);
+tempData.push(temp);
+rpmData.push(rpm);
+currentData.push(current);
+luxData.push(lux);
+
+if(labels.length>10){
+
+labels.shift();
+
+voltageData.shift();
+tempData.shift();
+rpmData.shift();
+currentData.shift();
+luxData.shift();
+
+}
+
+voltageChart.data.datasets[0].data=
+voltageData;
+
+tempChart.data.datasets[0].data=
+tempData;
+
+rpmChart.data.datasets[0].data=
+rpmData;
+
+currentChart.data.datasets[0].data=
+currentData;
+
+luxChart.data.datasets[0].data=
+luxData;
+
+voltageChart.update();
+tempChart.update();
+rpmChart.update();
+currentChart.update();
+luxChart.update();
+
+cekLampu();
+
+},3000);
+
+function cekLampu(){
+
+const on=
+document.getElementById(
+"onTime"
+).value;
+
+const off=
+document.getElementById(
+"offTime"
+).value;
+
+if(!on||!off)return;
+
+const lamp=
+document.getElementById(
+"lampStatus"
+);
+
+const now=
+new Date();
+
+const current=
+now.getHours()*60+
+now.getMinutes();
+
+const [h1,m1]=on.split(":");
+const [h2,m2]=off.split(":");
+
+const start=
+parseInt(h1)*60+
+parseInt(m1);
+
+const end=
+parseInt(h2)*60+
+parseInt(m2);
+
+if(current>=start&&current<end){
+
+lamp.innerText="ON";
+lamp.className="status on";
+
+}
+else{
+
+lamp.innerText="OFF";
+lamp.className="status off";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
